@@ -13,8 +13,6 @@ from envs.wrappers import OneHotWrapper
 
 
 
-# env = VariableGamblingEnv(p=[0.9, 0.1, 0.1], rotation_interval=50)
-
 env = CardSortingEnv(n_classes=4, n_features=3, change_period=100)
 env = OneHotWrapper(env, env.n_classes)
 
@@ -88,7 +86,7 @@ for agent in agents:
     # np.random.seed(42)
     # random.seed(42)
 
-    STEPS = 5_000
+    STEPS = 10_000
     state, _ = env.reset()
     reward_history = np.zeros(STEPS)
     for step in range(STEPS):
@@ -106,7 +104,7 @@ for agent in agents:
 
     plt.plot(reward_history.cumsum())
 
-pd.DataFrame(results).to_csv('results.csv', index=False)
+pd.DataFrame(results).to_csv('results_cardsorting.csv', index=False)
 
 plt.legend([x.__class__.__name__ for x in agents])
 plt.show()
