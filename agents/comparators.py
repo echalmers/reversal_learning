@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 
-class MBMFParallel:
+class MBMFParallelOptimal:
 
     def __init__(self, mb_network, mf_network, input_shape, batch_size, replay_buffer_size, update_frequency,
                  gamma, epsilon, lr):
@@ -20,10 +20,8 @@ class MBMFParallel:
             gamma=gamma,
             epsilon=epsilon,
             lr=1e-1,
-            sync_frequency=1
         )
-        assert (mb_network[-1].out_features / mb_network[0].in_features).is_integer()
-        self.one_hot_encoder = OneHotEncoder(n_values=int(mb_network[-1].out_features / mb_network[0].in_features))
+        self.one_hot_encoder = OneHotEncoder(n_values=mf_network[-1].out_features)
 
         self.mf_agent = DQN(
             network=mf_network,
@@ -66,3 +64,39 @@ class MBMFParallel:
         # update mf learner
         self.mf_agent.update(state, action, reward, new_state, done)
 
+
+class MBMFParallel2:
+
+    def __init__(self, dqn, n_classes, n_features):
+        self.dqn = dqn
+        self.n_classes = n_classes
+        self.n_features = n_features
+        self.last_selection = None
+        self.one_hot_encoder = OneHotEncoder(n_values=n_classes)
+
+    def select_action(self, state):
+        if random.random() < self.dqn.epsilon:
+            self.last_selection = 'random'
+            return np.random.choice(self.n_classes)
+
+        action_values = self.dqn.get_action_values(state).numpy()
+        action = action_values.argmax()
+        if action >= self.n_features: # these values are for taking explicit actions, the others are for matching based on feature
+            self.last_selection = 'action'
+            return action - self.n_features
+
+        self.last_selection = int(action)
+        _, feature_vector = self.one_hot_encoder.reverse(state)
+        return feature_vector[action]
+
+    def update(self, state, action, reward, new_state, done):
+        if self.last_selection in ['action', 'random']:
+            action += self.n_features
+
+        elif isinstance(self.last_selection, int):
+            action = self.last_selection
+
+        else:
+            raise Exception()
+
+        self.dqn.update(state, action, reward, new_state, done)

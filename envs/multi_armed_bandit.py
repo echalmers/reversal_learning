@@ -41,6 +41,9 @@ class VariableGamblingEnv(gym.Env):
         reward = reward * (self.reward - self.penalty) + self.penalty
         return np.array([0]), reward, False, False, dict()
 
+    def get_correct_action(self):
+        return np.argmax(self.p)
+
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         pass
 

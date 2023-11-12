@@ -47,6 +47,9 @@ class CardSortingEnv(gym.Env):
         self.step_number = 0
         return self.card, dict()
 
+    def get_correct_action(self):
+        return self.card[self.match_feature]
+
     def render(self) -> RenderFrame | list[RenderFrame] | None:
         pass
 

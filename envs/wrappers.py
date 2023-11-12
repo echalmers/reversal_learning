@@ -13,7 +13,7 @@ class OneHotEncoder:
         return new_obs.flatten()
 
     def reverse(self, one_hot_vec):
-        reshaped = one_hot_vec.reshape((self.n_values, -1))
+        reshaped = one_hot_vec.reshape((-1, self.n_values))
         return reshaped, reshaped.argmax(axis=1).flatten()
 
 
