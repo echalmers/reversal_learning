@@ -67,8 +67,18 @@ class MBMFParallelOptimal:
 
 class MBMFParallel2:
 
-    def __init__(self, dqn, n_classes, n_features):
-        self.dqn = dqn
+    def __init__(self, network, input_shape, batch_size, replay_buffer_size, update_frequency,
+                 gamma, epsilon, lr, n_classes, n_features):
+        self.dqn = DQN(
+            network=network,
+            input_shape=input_shape,
+            batch_size=batch_size,
+            replay_buffer_size=replay_buffer_size,
+            update_frequency=update_frequency,
+            gamma=gamma,
+            epsilon=epsilon,
+            lr=lr
+        )
         self.n_classes = n_classes
         self.n_features = n_features
         self.last_selection = None

@@ -29,6 +29,7 @@ class VariableGamblingEnv(gym.Env):
 
     def reset(self, *args, **kwars) -> tuple[ObsType, dict[str, Any]]:
         self.p = np.roll(self.p, 1)
+        self.step_count = 0
         return np.array([0]), dict()
 
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
