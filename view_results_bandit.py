@@ -15,6 +15,15 @@ results = pd.read_csv('results_bandit.csv', index_col=None)
 #     results.loc[i, 'perseveration'] = int(this_act == (correct_act - 1) % results['correct_action'].max())
 # print(results.groupby('agent')[['ws', 'ls', 'perseveration']].sum())
 
+# infer rotation inteval
+diff = results['correct_action'].diff()
+interval = diff[diff != 0].index[1]
+
+# calculate LSWS
+results['switch'] = results['action'].diff() != 0
+results['loose_switch'] = (results['reward'] < 0) & (results['switch'])
+results['win_stay'] = (results['reward'] > 0) & (~results['switch'])
+
 results['cumulative_reward'] = results.groupby(['rep', 'agent'])['reward'].transform(pd.Series.cumsum)
 sns.lineplot(data=results, x='step', y='cumulative_reward', hue='agent', n_boot=1)
 plt.show()
