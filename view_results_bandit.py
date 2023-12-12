@@ -23,6 +23,8 @@ interval = diff[diff != 0].index[1]
 results['switch'] = results['action'].diff() != 0
 results['loose_switch'] = (results['reward'] < 0) & (results['switch'])
 results['win_stay'] = (results['reward'] > 0) & (~results['switch'])
+print(results[results['reward'] < 0].groupby('agent')['loose_switch'].mean())
+print(results[results['reward'] > 0].groupby('agent')['win_stay'].mean())
 
 results['cumulative_reward'] = results.groupby(['rep', 'agent'])['reward'].transform(pd.Series.cumsum)
 sns.lineplot(data=results, x='step', y='cumulative_reward', hue='agent', n_boot=1)
