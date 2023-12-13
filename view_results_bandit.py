@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 # compute win-stay and lose-switch, and perseveration errors FOR BANDIT TASK ONLY
 results = pd.read_csv('results_bandit.csv', index_col=None)
+results['agent'] = results['agent'].replace({'PerfectInfoAgent': 'theoretical\nlimit',
+                                             'NewLearner': 'new rule',
+                                             'QLearner': 'TD learning'})
+
 # for i in range(1, len(results.index)):
 #     last_act = results.loc[i - 1, 'action']
 #     this_act = results.loc[i, 'action']
@@ -23,10 +27,31 @@ interval = diff[diff != 0].index[1]
 results['switch'] = results['action'].diff() != 0
 results['loose_switch'] = (results['reward'] < 0) & (results['switch'])
 results['win_stay'] = (results['reward'] > 0) & (~results['switch'])
-print(results[results['reward'] < 0].groupby('agent')['loose_switch'].mean())
-print(results[results['reward'] > 0].groupby('agent')['win_stay'].mean())
+wsls = pd.DataFrame()
+wsls['loose_switch'] = results[results['reward'] < 0].groupby('agent')['loose_switch'].mean() * 100
+wsls['win_stay'] = results[results['reward'] > 0].groupby('agent')['win_stay'].mean() * 100
 
-results['cumulative_reward'] = results.groupby(['rep', 'agent'])['reward'].transform(pd.Series.cumsum)
-sns.lineplot(data=results, x='step', y='cumulative_reward', hue='agent', n_boot=1)
+
+# results['cumulative_reward'] = results.groupby(['rep', 'agent'])['reward'].transform(pd.Series.cumsum)
+# sns.lineplot(data=results, x='step', y='cumulative_reward', hue='agent', n_boot=1)
+
+plt.figure()
+# plt.suptitle('performance in variable Iowa Gambling Task')
+plt.subplot(1,3,1)
+sns.barplot(results, x='agent', y='reward', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
+plt.title('average reward per step')
+plt.ylabel('')
+plt.xlabel('')
+plt.subplot(1,3,2)
+sns.barplot(results[results['reward'] < 0], x='agent', y='loose_switch', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
+plt.title('loose-switch (%)')
+plt.ylabel('')
+plt.xlabel('')
+plt.subplot(1,3,3)
+sns.barplot(results[results['reward'] > 0], x='agent', y='win_stay', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
+plt.title('win-stay (%)')
+plt.ylabel('')
+plt.xlabel('')
+
 plt.show()
 

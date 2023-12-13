@@ -35,6 +35,7 @@ class PerfectInfoAgent(BGalbraithLearner):
         super().__init__(Agent(MultiArmedBandit(k=n), UCBPolicy(c)))
         self.step_count = 0
         self.rotation_interval = rotation_interval
+        self.c = c
 
     def update(self, state, action, reward, new_state, done):
         self.step_count += 1
