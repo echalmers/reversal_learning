@@ -19,11 +19,11 @@ env = OneHotWrapper(env, env.n_classes)
 
 state, _ = env.reset()
 
-with open('best_dqn_cardsorting.pkl', 'rb') as f:
+with open('data/best_dqn_cardsorting.pkl', 'rb') as f:
     standard_agent = pickle.load(f)
-with open('best_modulated_cardsorting.pkl', 'rb') as f:
+with open('data/best_modulated_cardsorting.pkl', 'rb') as f:
     modulated_agent = pickle.load(f)
-with open('best_parallel_cardsorting.pkl', 'rb') as f:
+with open('data/best_parallel_cardsorting.pkl', 'rb') as f:
     mbmf_agent_2 = pickle.load(f)
 
 agents = [
@@ -55,7 +55,7 @@ for rep in range(10):
 
         plt.plot(reward_history.cumsum())
 
-pd.DataFrame(results).to_csv('results_cardsorting.csv', index=False)
+pd.DataFrame(results).to_csv('data/results_cardsorting.csv', index=False)
 
 plt.legend([x.__class__.__name__ for x in agents])
 plt.show()

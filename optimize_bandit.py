@@ -31,7 +31,7 @@ best_perfect_info = optimize_params(environment=env, agent_class=PerfectInfoAgen
                                     params={'n': [len(p)], 'c': [0.25, 0.5, 1, 2, 4], 'rotation_interval': [rotation_interval]},
                                     param_search_steps=10000
                                     )
-with open('best_perfect_info_bandit.pkl', 'wb') as f:
+with open('data/best_perfect_info_bandit.pkl', 'wb') as f:
     pickle.dump(best_perfect_info, f)
 
 # best_dqn = optimize_params(environment=env, agent_class=DQN,
@@ -71,12 +71,12 @@ best_modulated_tabular = optimize_params(environment=env, agent_class=ModulatedT
                                  params={'action_list': [np.arange(len(p))], 'gamma': [0.75], 'alpha': [1, 0.5, 0.1], 'default_value': [1], 'softmax_temperature': [0.25, 1]},
                                  param_search_steps=10_000
                                  )
-with open('best_modulated_tabular_bandit.pkl', 'wb') as f:
+with open('data/best_modulated_tabular_bandit.pkl', 'wb') as f:
     pickle.dump(best_modulated_tabular, f)
 
 best_q_learner = optimize_params(environment=env, agent_class=QLearner,
                                  params={'action_list': [np.arange(len(p))], 'gamma': [0.75], 'alpha': [1, 0.5, 0.1], 'default_value': [1], 'softmax_temperature': [0.25, 1]},
                                  param_search_steps=10_000
                                  )
-with open('best_q_learner_bandit.pkl', 'wb') as f:
+with open('data/best_q_learner_bandit.pkl', 'wb') as f:
     pickle.dump(best_q_learner, f)

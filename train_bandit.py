@@ -25,11 +25,11 @@ state, _ = env.reset()
 #     standard_agent = pickle.load(f)
 # with open('best_modulated_bandit.pkl', 'rb') as f:
 #     modulated_agent = pickle.load(f)
-with open('best_perfect_info_bandit.pkl', 'rb') as f:
+with open('data/best_perfect_info_bandit.pkl', 'rb') as f:
     perfect_info = pickle.load(f)
-with open('best_modulated_tabular_bandit.pkl', 'rb') as f:
+with open('data/best_modulated_tabular_bandit.pkl', 'rb') as f:
     modulated_tabular = pickle.load(f)
-with open('best_q_learner_bandit.pkl', 'rb') as f:
+with open('data/best_q_learner_bandit.pkl', 'rb') as f:
     q_learner = pickle.load(f)
 
 
@@ -67,7 +67,7 @@ for rep in range(10):
 
         plt.plot(reward_history.cumsum())
 
-pd.DataFrame(results).to_csv('results_bandit.csv', index=False)
+pd.DataFrame(results).to_csv('data/results_bandit.csv', index=False)
 
 plt.legend([x.__class__.__name__ for x in agents])
 plt.show()

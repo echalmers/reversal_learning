@@ -20,7 +20,7 @@ class TabularLearner:  #(ReinforcementLearner):
     """
 
     def __init__(self, action_list, default_value=1, alpha=0.1, gamma=0.9, epsilon=None,
-                 softmax_temperature=1, modulated_td_error=False):
+                 softmax_temperature=1, modulated_td_error=False, softmax_temperature_value_update=None):
         """
         :param action_list: list of available actions in the environment
         :param default_value: default value assigned to previously-untried state-action combinations
@@ -30,6 +30,8 @@ class TabularLearner:  #(ReinforcementLearner):
         :param softmax_temperature: softmax temperature for use in the new RL rule. Will also be used for action
         selection if specified and epsilon is not
         :param modulated_td_error: if True, will use the new RL rule from the paper
+        :param softmax_temperature_value_update: softmax temperature to use for value updates.
+        Defaults to softmax_tempurature
         """
         self.Q = {action: dict() for action in action_list}
         self.alpha = alpha
@@ -38,6 +40,7 @@ class TabularLearner:  #(ReinforcementLearner):
         self.epsilon = epsilon
         self.softmax_temperature = softmax_temperature
         self.modulated_td_error = modulated_td_error
+        self.softmax_temperature_value_update = softmax_temperature_value_update or self.softmax_temperature
         self.sum_update = 0
 
     def select_action(self, state):
@@ -59,7 +62,7 @@ class TabularLearner:  #(ReinforcementLearner):
         if self.modulated_td_error:
             p_act = softmax(
                 [self.Q[a].get(tuple(state), self.default_value) for a in self.Q],
-                t=self.softmax_temperature
+                t=self.softmax_temperature_value_update
             )[list(self.Q).index(action)]
 
             self.Q[action][tuple(state)] = current_val + self.alpha * p_act * (observed_val - current_val)
