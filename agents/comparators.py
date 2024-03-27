@@ -3,6 +3,7 @@ from copy import deepcopy
 from envs.wrappers import OneHotEncoder
 import numpy as np
 import random
+from agents.tabular import TabularLearner
 
 
 class MBMFParallelOptimal:
@@ -110,3 +111,16 @@ class MBMFParallel2:
             raise Exception()
 
         self.dqn.update(state, action, reward, new_state, done)
+
+
+class StrategyCardSorter(TabularLearner):
+
+    last_strategy_choice = None
+
+    def select_action(self, state):
+        action = super().select_action((0,))  # select a strategy #
+        self.last_strategy_choice = action
+        return state[action]  # convert strategy # into a card choice
+
+    def update(self, state, action, reward, new_state, done=None):
+        super().update((0,), self.last_strategy_choice, reward, (0,), done)

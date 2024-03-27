@@ -43,6 +43,9 @@ class Experiment:
         self.state, _ = environment.reset()
         self.n_steps = n_steps
 
+    def run(self):
+        return self()
+
     def __call__(self):
 
         if self.params is not None:

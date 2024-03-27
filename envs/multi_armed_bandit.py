@@ -3,6 +3,7 @@ from gym.spaces import Discrete
 import numpy as np
 from gymnasium.core import RenderFrame, ActType, ObsType
 from typing import SupportsFloat, Any
+from numbers import Number
 
 
 class VariableGamblingEnv(gym.Env):
@@ -18,8 +19,8 @@ class VariableGamblingEnv(gym.Env):
         :param rotation_interval: number of pulls before probabilities rotate
         """
         self.p = np.array(p)
-        self.reward = reward
-        self.penalty = penalty
+        self.reward = [reward] * len(p) if isinstance(reward, Number) else reward
+        self.penalty = [penalty] * len(p) if isinstance(penalty, Number) else penalty
         self.rotation_interval = rotation_interval
 
         self.observation_space = Discrete(1)
@@ -39,7 +40,7 @@ class VariableGamblingEnv(gym.Env):
             print('rotating probabilities')
 
         reward = (np.random.random() <= self.p[action]).astype(int)
-        reward = reward * (self.reward - self.penalty) + self.penalty
+        reward = reward * (self.reward[action] - self.penalty[action]) + self.penalty[action]
         return np.array([0]), reward, False, False, dict()
 
     def get_correct_action(self):
