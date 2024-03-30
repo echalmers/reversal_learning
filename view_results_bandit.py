@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import scale_luminosity
+import matplotlib.transforms as mtransforms
 
 
 # compute win-stay and lose-switch, and perseveration errors FOR BANDIT TASK ONLY
@@ -26,8 +27,8 @@ interval = diff[diff != 0].index[1]
 
 # calculate LSWS
 results['switch'] = results['action'].diff() != 0
-results['loose_switch'] = (results['reward'] < 0) & (results['switch'])
-results['win_stay'] = (results['reward'] > 0) & (~results['switch'])
+results['loose_switch'] = ((results['reward'] < 0) & (results['switch'])) * 100
+results['win_stay'] = ((results['reward'] > 0) & (~results['switch'])) * 100
 wsls = pd.DataFrame()
 wsls['loose_switch'] = results[results['reward'] < 0].groupby('agent')['loose_switch'].mean() * 100
 wsls['win_stay'] = results[results['reward'] > 0].groupby('agent')['win_stay'].mean() * 100
@@ -46,30 +47,38 @@ fig, ax = plt.subplot_mosaic(layout, width_ratios=[10,0,10,0,10], height_ratios=
 # plt.suptitle('performance in variable Iowa Gambling Task')
 
 plt.sca(ax['a'])
-sns.lineplot(data=results[results['step'] < 1000], x='step', y='cumulative_reward', hue='agent', n_boot=1,
+sns.lineplot(data=results[results['step'] < 1000], x='step', y='cumulative_reward', hue='agent', n_boot=1, errorbar=('ci', 95),
              palette=[scale_luminosity('peachpuff', 0.5), scale_luminosity('skyblue', 0.5), scale_luminosity('palegoldenrod', 0.5)])
-plt.ylabel('')
+plt.ylabel('cumulative reward')
 plt.title('cumulative reward in variable Iowa gambling task')
 
 results['agent'] = results['agent'].apply(lambda s: s.replace(' ', '\n'))
 plt.sca(ax['b'])
-sns.barplot(results, x='agent', y='reward', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
-plt.title('average reward per step')
-plt.ylabel('')
+sns.barplot(results, x='agent', y='reward', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),)
+plt.title('reward obtained')
+plt.ylabel('average reward per step')
 plt.xlabel('')
 
 plt.sca(ax['c'])
-sns.barplot(results[results['reward'] < 0], x='agent', y='loose_switch', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
-plt.title('loose-switch (%)')
-plt.ylabel('')
+sns.barplot(results[results['reward'] < 0], x='agent', y='loose_switch', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),)
+plt.title('lose-switch')
+plt.ylabel('lose-switch (%)')
 plt.xlabel('')
+plt.ylim((0, 100))
 # plt.xticks(rotation=25, horizontalalignment='right')
 
 plt.sca(ax['d'])
-sns.barplot(results[results['reward'] > 0], x='agent', y='win_stay', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'])
-plt.title('win-stay (%)')
-plt.ylabel('')
+sns.barplot(results[results['reward'] > 0], x='agent', y='win_stay', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),)
+plt.title('win-stay')
+plt.ylabel('win-stay (%)')
 plt.xlabel('')
+plt.ylim((0, 100))
+
+for label, ax in ax.items():
+    # label physical distance to the left and up:
+    trans = mtransforms.ScaledTranslation(-20/72, 7/72, fig.dpi_scale_trans)
+    ax.text(0.0, 1.0, label, transform=ax.transAxes + trans,
+            fontsize='large', weight='bold', va='bottom', fontfamily='serif')
 
 plt.tight_layout()
 plt.savefig('data/bandit_results.png', dpi=300)

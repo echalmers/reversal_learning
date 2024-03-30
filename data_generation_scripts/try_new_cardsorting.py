@@ -26,7 +26,7 @@ if __name__ == '__main__':
     results = pd.DataFrame()
     for rep in range(20):
 
-        env = CardSortingEnv(n_classes=4, n_features=3, change_period=10)
+        env = CardSortingEnv(n_classes=4, n_features=3, change_after_successes=10)
 
         for experiment in [
             Experiment(agent=TabularCardSorter, environment=env, n_steps=128, sensors=[correct_strategy, card],
@@ -46,4 +46,4 @@ if __name__ == '__main__':
             df['rep'] = rep
             results = pd.concat((results, df))
 
-            results.to_csv('../results_classic_cardsorting.csv', index=False)
+            results.to_csv('../data/results_classic_cardsorting.csv', index=False)
