@@ -3,7 +3,7 @@ from copy import deepcopy
 from envs.wrappers import OneHotEncoder
 import numpy as np
 import random
-from agents.tabular import TabularLearner
+from agents.tabular import TabularLearner, softmax
 
 
 class MBMFParallelOptimal:
@@ -113,14 +113,77 @@ class MBMFParallel2:
         self.dqn.update(state, action, reward, new_state, done)
 
 
+class TabularCardSorter(TabularLearner):
+    def __init__(self, default_value=1, alpha=0.1, gamma=0.9, epsilon=None, softmax_temperature=1,
+                 modulated_td_error=False, softmax_temperature_value_update=None):
+        super().__init__(action_list=[0, 1, 2, 3], default_value=default_value, alpha=alpha, gamma=gamma, epsilon=epsilon,
+                         softmax_temperature=softmax_temperature, modulated_td_error=modulated_td_error,
+                         softmax_temperature_value_update=softmax_temperature_value_update)
+
+    def select_action(self, state):
+        return super().select_action((0,))
+
+    def update(self, state, action, reward, new_state, done=None):
+        return super().update((0,), action, reward, (0,), done)
+
+
 class StrategyCardSorter(TabularLearner):
 
-    last_strategy_choice = None
+    def __init__(self, default_value=1, alpha=0.1, gamma=0.9, epsilon=None, softmax_temperature=1, modulated_td_error=False, softmax_temperature_value_update=None):
+        super().__init__(action_list=[0, 1, 2], default_value=default_value, alpha=alpha, gamma=gamma, epsilon=epsilon,
+                         softmax_temperature=softmax_temperature, modulated_td_error=modulated_td_error,
+                         softmax_temperature_value_update=softmax_temperature_value_update)
+        # self.last_strategy_choice = None
 
     def select_action(self, state):
         action = super().select_action((0,))  # select a strategy #
-        self.last_strategy_choice = action
+        # self.last_strategy_choice = action
         return state[action]  # convert strategy # into a card choice
 
+    def get_values(self, state):
+        strategy_values = [self.Q[a].get((0,), self.default_value) for a in self.Q]
+        choice_values = [0, 0, 0, 0]
+        for i in range(len(strategy_values)):
+            strategy_points_to = state[i]
+            choice_values[strategy_points_to] += strategy_values[i]
+        return choice_values
+
     def update(self, state, action, reward, new_state, done=None):
-        super().update((0,), self.last_strategy_choice, reward, (0,), done)
+        strategy_choice = np.where(state == action)[0]
+        if len(strategy_choice) == 1:
+            super().update((0,), strategy_choice[0], reward, (0,), done)
+        else:
+            print("action doesn't correspond to a strategy")
+
+
+class SteinkeParallelLearner:
+
+    def __init__(self, default_value=1, alpha_mb=0.1, inertia_mb=0.9, softmax_temperature=1,
+                 alpha_mf=0.1, inertia_mf=0.9, w=0.5):
+        self.inertia_mb = inertia_mb
+        self.inertia_mf = inertia_mf
+        self.w = w
+        self.softmax_temperature = softmax_temperature
+
+        self.mb_learner = StrategyCardSorter(default_value=default_value, alpha=alpha_mb, gamma=0, softmax_temperature=softmax_temperature,
+                                             modulated_td_error=False, softmax_temperature_value_update=None)
+        self.mf_learner = TabularCardSorter(default_value=default_value, alpha=alpha_mf, gamma=0, softmax_temperature=softmax_temperature,
+                                         modulated_td_error=False, softmax_temperature_value_update=None)
+
+    def select_action(self, state):
+        mb_values = np.array(self.mb_learner.get_values(state))
+        mf_values = np.array(self.mf_learner.get_values(state))
+        combined_values = self.w * mb_values + (1 - self.w) * mf_values
+        action = np.random.choice([0, 1, 2, 3], p=softmax(combined_values, self.softmax_temperature))
+        if action not in state:
+            print('picking an action with no strategy')
+        return action
+
+    def update(self, state, action, reward, new_state, done=None):
+        for table, inertia in [(self.mb_learner.Q, self.inertia_mb), (self.mf_learner.Q, self.inertia_mf)]:
+            for d in table.values():
+                for s in d:
+                    d[s] *= inertia
+
+        self.mf_learner.update(state, action, reward, new_state, done)
+        self.mb_learner.update(state, action, reward, new_state, done)

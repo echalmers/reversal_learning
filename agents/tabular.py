@@ -49,9 +49,12 @@ class TabularLearner:  #(ReinforcementLearner):
                 return np.random.choice(list(self.Q))
 
         elif isinstance(self.softmax_temperature, Number):
-            return np.random.choice(list(self.Q),
-                                    p=softmax([self.Q[a].get(tuple(state), self.default_value) for a in self.Q], t=self.softmax_temperature)
-                                    )
+            try:
+                return np.random.choice(list(self.Q),
+                                        p=softmax([self.Q[a].get(tuple(state), self.default_value) for a in self.Q], t=self.softmax_temperature)
+                                        )
+            except Exception as ex:
+                raise ex
 
         return max(self.Q, key=lambda a: self.Q[a].get(tuple(state), self.default_value))
 
@@ -72,6 +75,8 @@ class TabularLearner:  #(ReinforcementLearner):
             self.Q[action][tuple(state)] = current_val + self.alpha * (observed_val - current_val)
             self.sum_update += self.alpha
 
+    def get_values(self, state):
+        return [self.Q[a].get(tuple(state), self.default_value) for a in self.Q]
 
 class QLearner(TabularLearner):
 

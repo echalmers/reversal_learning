@@ -20,8 +20,8 @@ class CardSortingEnv(gym.Env):
         self.action_space = Discrete(n_classes)
 
     def _draw_card(self):
-        return np.random.randint(low=[0] * self.n_features, high=[self.n_classes] * self.n_features)
-        # return np.random.choice(self.n_classes, self.n_features, replace=False)
+        # return np.random.randint(low=[0] * self.n_features, high=[self.n_classes] * self.n_features)
+        return np.random.choice(self.n_classes, self.n_features, replace=False)
 
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
 
