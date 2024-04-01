@@ -4,11 +4,11 @@ import seaborn as sns
 from utils import scale_luminosity
 
 
-results = pd.read_csv('data/results_bandit.csv', index_col=None)
+results = pd.read_csv('../data/results_bandit.csv', index_col=None)
 perfect_info_reward = results[results['agent'] == 'PerfectInfoAgent']['reward'].mean()
 q_learning_reward = results[results['agent'] == 'QLearner']['reward'].mean()
 
-sweep_results = pd.read_csv('data/results_bandit_sweep.csv', index_col=None)
+sweep_results = pd.read_csv('../data/results_bandit_sweep.csv', index_col=None)
 
 fig = plt.figure(figsize=(6, 3))
 p = sns.lineplot(sweep_results, x='tau', y='reward', n_boot=10, errorbar=('ci', 95))
@@ -27,5 +27,5 @@ plt.xlabel('temperature parameter (τ)')
 plt.title('reward in gambling task varies with τ')
 
 plt.tight_layout()
-plt.savefig('data/tau_sweep.png', dpi=300)
+plt.savefig('../data/tau_sweep.png', dpi=300)
 plt.show()

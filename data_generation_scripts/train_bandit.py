@@ -13,29 +13,41 @@ from envs.wrappers import OneHotWrapper
 import pickle
 
 
-
-env = CardSortingEnv(n_classes=4, n_features=3, change_period=200)
-env = OneHotWrapper(env, env.n_classes)
-
+n = 7
+p = np.random.rand(n) * 0.5 + 0.25
+p[-1] = 0
+p[0] = 0.9
+env = VariableGamblingEnv(p=p, rotation_interval=100)
 state, _ = env.reset()
 
-with open('data/best_dqn_cardsorting.pkl', 'rb') as f:
-    standard_agent = pickle.load(f)
-with open('data/best_modulated_cardsorting.pkl', 'rb') as f:
-    modulated_agent = pickle.load(f)
-with open('data/best_parallel_cardsorting.pkl', 'rb') as f:
-    mbmf_agent_2 = pickle.load(f)
+
+# with open('best_dqn_bandit.pkl', 'rb') as f:
+#     standard_agent = pickle.load(f)
+# with open('best_modulated_bandit.pkl', 'rb') as f:
+#     modulated_agent = pickle.load(f)
+with open('../data/best_perfect_info_bandit.pkl', 'rb') as f:
+    perfect_info = pickle.load(f)
+with open('../data/best_modulated_tabular_bandit.pkl', 'rb') as f:
+    modulated_tabular = pickle.load(f)
+with open('../data/best_q_learner_bandit.pkl', 'rb') as f:
+    q_learner = pickle.load(f)
+
+
 
 agents = [
-    modulated_agent,
-    standard_agent,
-    mbmf_agent_2
+    #modulated_agent,
+    # standard_agent,
+    perfect_info,
+    modulated_tabular,
+    q_learner,
 ]
 
 results = []
 
 for rep in range(10):
     for agent in agents:
+        # np.random.seed(42)
+        # random.seed(42)
 
         STEPS = 5000
         state, _ = env.reset()
@@ -55,7 +67,7 @@ for rep in range(10):
 
         plt.plot(reward_history.cumsum())
 
-pd.DataFrame(results).to_csv('data/results_cardsorting.csv', index=False)
+pd.DataFrame(results).to_csv('../data/results_bandit.csv', index=False)
 
 plt.legend([x.__class__.__name__ for x in agents])
 plt.show()

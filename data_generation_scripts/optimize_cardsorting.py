@@ -32,7 +32,7 @@ best_dqn = optimize_params(environment=env, agent_class=DQN,
                            },
                            param_search_steps=10000
                            )
-with open('data/best_dqn_cardsorting.pkl', 'wb') as f:
+with open('../data/best_dqn_cardsorting.pkl', 'wb') as f:
     pickle.dump(best_dqn, f)
 
 best_modulated = optimize_params(environment=env, agent_class=ModulatedDQN,
@@ -49,7 +49,7 @@ best_modulated = optimize_params(environment=env, agent_class=ModulatedDQN,
                            },
                            param_search_steps=10000
                            )
-with open('data/best_modulated_cardsorting.pkl', 'wb') as f:
+with open('../data/best_modulated_cardsorting.pkl', 'wb') as f:
     pickle.dump(best_modulated, f)
 
 best_parallel = optimize_params(environment=env, agent_class=MBMFParallel2,
@@ -67,5 +67,5 @@ best_parallel = optimize_params(environment=env, agent_class=MBMFParallel2,
                            },
                            param_search_steps=10000
                            )
-with open('data/best_parallel_cardsorting.pkl', 'wb') as f:
+with open('../data/best_parallel_cardsorting.pkl', 'wb') as f:
     pickle.dump(best_parallel, f)

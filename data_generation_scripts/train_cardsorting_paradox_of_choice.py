@@ -9,9 +9,9 @@ import pickle
 from envs.wrappers import OneHotWrapper
 
 
-with open('data/best_dqn_cardsorting.pkl', 'rb') as f:
+with open('../data/best_dqn_cardsorting.pkl', 'rb') as f:
     standard_agent = pickle.load(f)
-with open('data/best_modulated_cardsorting.pkl', 'rb') as f:
+with open('../data/best_modulated_cardsorting.pkl', 'rb') as f:
     modulated_agent = pickle.load(f)
 
 results = []
@@ -61,4 +61,4 @@ for rep in range(10):
             {'agent': 'new rule', 'n_features': n, 'reward': df['reward'].mean()}
         )
 
-pd.DataFrame(results).to_csv('data/results_cardsorting_paradox.csv', index=False)
+pd.DataFrame(results).to_csv('../data/results_cardsorting_paradox.csv', index=False)

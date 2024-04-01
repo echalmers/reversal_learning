@@ -3,8 +3,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import scale_luminosity
 import matplotlib.transforms as mtransforms
+from scipy.stats import ttest_ind
+from itertools import combinations
 
-results = pd.read_csv('data/results_cardsorting.csv', index_col=None)
+results = pd.read_csv('../data/results_cardsorting.csv', index_col=None)
 results['agent'] = results['agent'].replace({'DQN': 'TD learning network',
                                              'ModulatedDQN': 'new rule',
                                              'MBMFParallel2': 'parallel model-based/model-free'})
@@ -38,6 +40,15 @@ for label, ax in ax.items():
     ax.text(0.0, 1.0, label, transform=ax.transAxes + trans,
             fontsize='large', weight='bold', va='bottom', fontfamily='serif')
 
+# compute statistical significance
+mean_rewards_per_step = results.groupby(['agent', 'rep'])['reward'].mean().reset_index()
+print(mean_rewards_per_step.groupby('agent')['reward'].aggregate(['mean', 'std']))
+for comparison in combinations(results['agent'].unique(), 2):
+    print('____', comparison, '____')
+    rewards_0 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[0]]['reward']
+    rewards_1 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[1]]['reward']
+    print('compare mean rewards', ttest_ind(rewards_0, rewards_1, equal_var=False))
+
 plt.tight_layout()
-plt.savefig('data/cardsorting_results.png', dpi=300)
+plt.savefig('../data/cardsorting_results.png', dpi=300)
 plt.show()
