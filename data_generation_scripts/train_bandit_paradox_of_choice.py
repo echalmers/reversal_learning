@@ -16,13 +16,13 @@ import seaborn as sns
 import os
 
 
-if not os.path.isfile('data/results_bandit_paradox.csv'):
+if not os.path.isfile('../data/results_bandit_paradox.csv'):
 
-    with open('data/best_perfect_info_bandit.pkl', 'rb') as f:
+    with open('../data/best_perfect_info_bandit.pkl', 'rb') as f:
         perfect_info = pickle.load(f)
-    with open('data/best_modulated_tabular_bandit.pkl', 'rb') as f:
+    with open('../data/best_modulated_tabular_bandit.pkl', 'rb') as f:
         modulated_tabular = pickle.load(f)
-    with open('data/best_q_learner_bandit.pkl', 'rb') as f:
+    with open('../data/best_q_learner_bandit.pkl', 'rb') as f:
         q_learner = pickle.load(f)
 
     results = []
@@ -50,9 +50,9 @@ if not os.path.isfile('data/results_bandit_paradox.csv'):
                     {'agent': agent.__class__.__name__, 'n': n, 'reward': df['reward'].mean()}
                 )
 
-    pd.DataFrame(results).to_csv('data/results_bandit_paradox.csv', index=False)
+    pd.DataFrame(results).to_csv('../data/results_bandit_paradox.csv', index=False)
 
 
-results = pd.read_csv('data/results_bandit_paradox.csv', index_col=None)
+results = pd.read_csv('../data/results_bandit_paradox.csv', index_col=None)
 sns.lineplot(data=results, x='n', y='reward', hue='agent')
 plt.show()

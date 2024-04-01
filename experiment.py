@@ -1,3 +1,4 @@
+import multiprocessing
 import time
 import itertools
 from copy import deepcopy
@@ -23,7 +24,9 @@ def optimize_params(environment, agent_class, params, param_search_steps=1000):
     if len(combinations) == 1:
         return agent_class(**combinations[0])
     else:
-        rewards = list(map(ParamEvaluator(environment, agent_class, param_search_steps), combinations))
+        pool = multiprocessing.Pool(multiprocessing.cpu_count()-1)
+        rewards = list(pool.map(ParamEvaluator(environment, agent_class, param_search_steps), combinations))
+        pool.close()
         best_idx = np.argmax(rewards)
         print(combinations[best_idx])
         return agent_class(**combinations[best_idx])
@@ -44,6 +47,9 @@ class Experiment:
         self.n_steps = n_steps
 
     def __call__(self):
+        return self.run()
+
+    def run(self):
 
         if self.params is not None:
             self.agent = optimize_params(self.environment, self.agent, self.params, self.param_search_steps)
@@ -67,6 +73,9 @@ class Experiment:
 
         for step in range(self.n_steps):
 
+            for sensor in self.sensors:
+                results._set_value(step, sensor.__name__, sensor(self.environment, self.agent))
+
             action = self.agent.select_action(self.state)
             new_state, reward, done, _, _ = self.environment.step(action)
 
@@ -75,8 +84,6 @@ class Experiment:
             results.loc[step, 'action'] = action
 
             self.state = new_state
-            for sensor in self.sensors:
-                results._set_value(step, sensor.__name__, sensor(self.environment, self.agent))
 
         results['cumulative_reward'] = results['reward'].cumsum()
         return results

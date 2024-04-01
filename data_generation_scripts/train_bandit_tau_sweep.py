@@ -18,11 +18,11 @@ import os
 
 n = 7
 
-with open('data/best_perfect_info_bandit.pkl', 'rb') as f:
+with open('../data/best_perfect_info_bandit.pkl', 'rb') as f:
     perfect_info = pickle.load(f)
-with open('data/best_modulated_tabular_bandit.pkl', 'rb') as f:
+with open('../data/best_modulated_tabular_bandit.pkl', 'rb') as f:
     modulated_tabular = pickle.load(f)
-with open('data/best_q_learner_bandit.pkl', 'rb') as f:
+with open('../data/best_q_learner_bandit.pkl', 'rb') as f:
     q_learner = pickle.load(f)
 
 sweep_results = []
@@ -48,4 +48,4 @@ for rep in range(25):
             {'tau': tau, 'reward': df['reward'].mean()}
         )
 
-pd.DataFrame(sweep_results).to_csv('data/results_bandit_sweep.csv', index=False)
+pd.DataFrame(sweep_results).to_csv('../data/results_bandit_sweep.csv', index=False)

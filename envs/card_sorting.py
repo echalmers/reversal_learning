@@ -8,7 +8,7 @@ from gymnasium.core import RenderFrame, ActType, ObsType
 
 class CardSortingEnv(gym.Env):
 
-    def __init__(self, n_classes: int, n_features: int, change_period: int):
+    def __init__(self, n_classes: int, n_features: int, change_period: int = None, change_after_successes: int = None):
         self.n_classes = n_classes
         self.n_features = n_features
         self.change_period = change_period
@@ -16,28 +16,40 @@ class CardSortingEnv(gym.Env):
         self.match_feature = np.random.randint(n_features)
         self.step_number = 0
 
+        self.correct_matches = 0 # correct matches for the current strategy
+        self.change_after_successes = change_after_successes
+
         self.observation_space = Discrete(n_features)
         self.action_space = Discrete(n_classes)
 
     def _draw_card(self):
-        return np.random.randint(low=[0] * self.n_features, high=[self.n_classes] * self.n_features)
-        # return np.random.choice(self.n_classes, self.n_features, replace=False)
+        # return np.random.randint(low=[0] * self.n_features, high=[self.n_classes] * self.n_features)
+        return np.random.choice(self.n_classes, self.n_features, replace=False)
 
     def step(self, action: ActType) -> tuple[ObsType, SupportsFloat, bool, bool, dict[str, Any]]:
 
         # determine reward
         correct_act = self.card[self.match_feature]
         reward = 1 if action == correct_act else -1
+        self.correct_matches += int(reward > 0)
 
         # draw next card
         self.card = self._draw_card()
 
         # rotate match feature
         self.step_number += 1
-        if self.step_number % self.change_period == 0:
-            self.match_feature += 1
-            self.match_feature %= self.n_features
-            print(f'change match feature to {self.match_feature}')
+
+        if self.change_period is not None:
+            if self.step_number % self.change_period == 0:
+                self.match_feature += 1
+                self.match_feature %= self.n_features
+                print(f'change match feature to {self.match_feature}')
+        elif self.change_after_successes is not None:
+            if self.correct_matches == self.change_after_successes:
+                self.correct_matches = 0
+                self.match_feature += 1
+                self.match_feature %= self.n_features
+                print(f'change match feature to {self.match_feature}')
 
         return self.card, reward, False, False, dict()
 
