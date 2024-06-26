@@ -31,6 +31,8 @@ with open('../data/best_modulated_tabular_bandit.pkl', 'rb') as f:
     modulated_tabular = pickle.load(f)
 with open('../data/best_q_learner_bandit.pkl', 'rb') as f:
     q_learner = pickle.load(f)
+with open('../data/best_gradient_agent.pkl', 'rb') as f:
+    gradient_agent = pickle.load(f)
 
 
 
@@ -40,6 +42,7 @@ agents = [
     perfect_info,
     modulated_tabular,
     q_learner,
+    gradient_agent
 ]
 
 results = []

@@ -12,7 +12,8 @@ from itertools import combinations
 results = pd.read_csv('../data/results_bandit.csv', index_col=None)
 results['agent'] = results['agent'].replace({'PerfectInfoAgent': 'theoretical limit',
                                              'NewLearner': 'new rule',
-                                             'QLearner': 'TD learning'})
+                                             'QLearner': 'TD learning',
+                                             'GradientLearner': 'Gradient'})
 
 # infer rotation inteval
 diff = results['correct_action'].diff()
@@ -37,13 +38,13 @@ aaaaa
 .....
 b.c.d
 '''
-fig, ax = plt.subplot_mosaic(layout, width_ratios=[10,0,10,0,10], height_ratios=[10,0.1,10], figsize=(9, 6))
+fig, ax = plt.subplot_mosaic(layout, width_ratios=[10,0,10,0,10], height_ratios=[10,0.1,10], figsize=(12, 6))
 
 # plt.suptitle('performance in variable Iowa Gambling Task')
 
 plt.sca(ax['a'])
 sns.lineplot(data=results[results['step'] < 1000], x='step', y='cumulative_reward', hue='agent', n_boot=10, errorbar=('ci', 95),
-             palette=[scale_luminosity('peachpuff', 0.5), scale_luminosity('skyblue', 0.5), scale_luminosity('palegoldenrod', 0.5)])
+             palette=[scale_luminosity('peachpuff', 0.5), scale_luminosity('skyblue', 0.5), scale_luminosity('palegoldenrod', 0.5), 'grey'])
 plt.ylabel('cumulative reward')
 plt.title('cumulative reward in variable Iowa gambling task')
 
@@ -51,14 +52,14 @@ results['agent'] = results['agent'].apply(lambda s: s.replace(' ', '\n'))
 wsls['agent'] = wsls['agent'].apply(lambda s: s.replace(' ', '\n'))
 
 plt.sca(ax['b'])
-sns.barplot(results, x='agent', y='reward', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),)
+sns.barplot(results, x='agent', y='reward', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod', 'lightgrey'], errorbar=('ci', 95),)
 plt.title('reward obtained')
 plt.ylabel('average reward per step')
 plt.xlabel('')
 
 plt.sca(ax['c'])
-sns.barplot(wsls, x='agent', y='loose_switch', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),
-            order=['theoretical\nlimit','new\nrule', 'TD\nlearning'])
+sns.barplot(wsls, x='agent', y='loose_switch', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod', 'lightgrey'], errorbar=('ci', 95),
+            order=['theoretical\nlimit','new\nrule', 'TD\nlearning', 'Gradient'])
 plt.title('lose-switch')
 plt.ylabel('lose-switch (%)')
 plt.xlabel('')
@@ -66,8 +67,8 @@ plt.ylim((0, 100))
 # plt.xticks(rotation=25, horizontalalignment='right')
 
 plt.sca(ax['d'])
-sns.barplot(wsls, x='agent', y='win_stay', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod'], errorbar=('ci', 95),
-            order=['theoretical\nlimit','new\nrule', 'TD\nlearning'])
+sns.barplot(wsls, x='agent', y='win_stay', edgecolor=".5", palette=['peachpuff', 'skyblue', 'palegoldenrod', 'lightgrey'], errorbar=('ci', 95),
+            order=['theoretical\nlimit','new\nrule', 'TD\nlearning', 'Gradient'])
 plt.title('win-stay')
 plt.ylabel('win-stay (%)')
 plt.xlabel('')
