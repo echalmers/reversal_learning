@@ -41,13 +41,17 @@ for label, ax in ax.items():
             fontsize='large', weight='bold', va='bottom', fontfamily='serif')
 
 # compute statistical significance
+mean_reward_ss = pd.DataFrame()
 mean_rewards_per_step = results.groupby(['agent', 'rep'])['reward'].mean().reset_index()
-print(mean_rewards_per_step.groupby('agent')['reward'].aggregate(['mean', 'std']))
+print(mean_rewards_per_step.groupby('agent')['reward'].aggregate(['mean', 'std']).round(2))
 for comparison in combinations(results['agent'].unique(), 2):
     print('____', comparison, '____')
     rewards_0 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[0]]['reward']
     rewards_1 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[1]]['reward']
-    print('compare mean rewards', ttest_ind(rewards_0, rewards_1, equal_var=False))
+    # print('compare mean rewards', ttest_ind(rewards_0, rewards_1, equal_var=False))
+    mean_reward_test = ttest_ind(rewards_0, rewards_1, equal_var=False)
+    mean_reward_ss.loc[comparison[0], comparison[1]] = f'{mean_reward_test.statistic:.2f}, p={mean_reward_test.pvalue:.2E}, df={mean_reward_test.df:.0f}'
+print(mean_reward_ss)
 
 plt.tight_layout()
 plt.savefig('../data/cardsorting_results.png', dpi=300)

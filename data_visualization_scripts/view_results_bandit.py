@@ -6,6 +6,7 @@ from utils import scale_luminosity
 import matplotlib.transforms as mtransforms
 from scipy.stats import ttest_ind
 from itertools import combinations
+pd.options.display.width = 0
 
 
 # compute win-stay and lose-switch, and perseveration errors FOR BANDIT TASK ONLY
@@ -38,7 +39,7 @@ aaaaa
 .....
 b.c.d
 '''
-fig, ax = plt.subplot_mosaic(layout, width_ratios=[10,0,10,0,10], height_ratios=[10,0.1,10], figsize=(12, 6))
+fig, ax = plt.subplot_mosaic(layout, width_ratios=[10,0,10,0,10], height_ratios=[10,0.1,10], figsize=(10, 6))
 
 # plt.suptitle('performance in variable Iowa Gambling Task')
 
@@ -83,18 +84,29 @@ for label, ax in ax.items():
 # calculate statistical significance
 mean_rewards_per_step = results.groupby(['agent', 'rep'])['reward'].mean().reset_index()
 
-print(wsls.groupby('agent')['win_stay', 'loose_switch'].aggregate(['mean', 'std']))
-print(mean_rewards_per_step.groupby('agent')['reward'].aggregate(['mean', 'std']))
+print(wsls.groupby('agent')['win_stay', 'loose_switch'].aggregate(['mean', 'std']).round(1))
+print(mean_rewards_per_step.groupby('agent')['reward'].aggregate(['mean', 'std']).round(2))
 
+mean_reward_ss = pd.DataFrame()
+lose_switch_ss = pd.DataFrame()
+win_stay_ss = pd.DataFrame()
 for comparison in combinations(results['agent'].unique(), 2):
     print('____', comparison, '____')
     rewards_0 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[0]]['reward']
     rewards_1 = mean_rewards_per_step[mean_rewards_per_step['agent'] == comparison[1]]['reward']
-    print('compare mean rewards', ttest_ind(rewards_0, rewards_1, equal_var=False))
-    print('compare lose-switch', ttest_ind(wsls[wsls['agent'] == comparison[0]]['loose_switch'], wsls[wsls['agent'] == comparison[1]]['loose_switch'], equal_var=False))
-    print('compare win-stay', ttest_ind(wsls[wsls['agent'] == comparison[0]]['win_stay'], wsls[wsls['agent'] == comparison[1]]['win_stay'], equal_var=False))
+    mean_reward_test = ttest_ind(rewards_0, rewards_1, equal_var=False)
+    lose_switch_test = ttest_ind(wsls[wsls['agent'] == comparison[0]]['loose_switch'], wsls[wsls['agent'] == comparison[1]]['loose_switch'], equal_var=False)
+    win_stay_test = ttest_ind(wsls[wsls['agent'] == comparison[0]]['win_stay'], wsls[wsls['agent'] == comparison[1]]['win_stay'], equal_var=False)
+    # print('compare mean rewards', ttest_ind(rewards_0, rewards_1, equal_var=False))
+    # print('compare lose-switch', ttest_ind(wsls[wsls['agent'] == comparison[0]]['loose_switch'], wsls[wsls['agent'] == comparison[1]]['loose_switch'], equal_var=False))
+    # print('compare win-stay', ttest_ind(wsls[wsls['agent'] == comparison[0]]['win_stay'], wsls[wsls['agent'] == comparison[1]]['win_stay'], equal_var=False))
+    mean_reward_ss.loc[comparison[0], comparison[1]] = f'{mean_reward_test.statistic:.2f}, p={mean_reward_test.pvalue:.2E}, df={mean_reward_test.df:.0f}'
+    lose_switch_ss.loc[comparison[0], comparison[1]] = f'{lose_switch_test.statistic:.2f}, p={lose_switch_test.pvalue:.2E}, df={lose_switch_test.df:.0f}'
+    win_stay_ss.loc[comparison[0], comparison[1]] = f'{win_stay_test.statistic:.2f}, p={win_stay_test.pvalue:.2E}, df={win_stay_test.df:.0f}'
 
-
+print(mean_reward_ss)
+print(lose_switch_ss)
+print(win_stay_ss)
 
 plt.tight_layout()
 plt.savefig('../data/bandit_results.png', dpi=300)

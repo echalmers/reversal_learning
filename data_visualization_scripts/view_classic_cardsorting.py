@@ -38,7 +38,7 @@ print(df.groupby(['agent'])['error', 'perseverative_error'].aggregate(['mean', n
 
 
 layout = '''
-a
+ab
 '''
 fig, ax = plt.subplot_mosaic(layout, figsize=(10, 4))
 
@@ -53,21 +53,25 @@ sns.barplot(data=df, x='agent', y='error', errorbar='sd',
 plt.ylabel('total errors over 128 matches')
 plt.xlabel('')
 
-# plt.sca(ax['b'])
-# sns.barplot(data=df, x='agent', y='perseverative_error', errorbar='sd',
-#             order=['TD\nlearning',
-#                    'parallel\nmodel-based/\nmodel-free',
-#                    'new\nrule',
-#                    'human'],
-#             palette=['palegoldenrod', 'mistyrose', 'skyblue', 'lightgrey'], edgecolor=".5"
-#             )
-# plt.ylabel('perseverative errors')
-# plt.ylim(ax['a'].get_ylim())
-# plt.xlabel('')
+plt.sca(ax['b'])
+sns.barplot(data=df, x='agent', y='perseverative_error', errorbar='sd',
+            order=['TD\nlearning',
+                   'parallel\nmodel-based/\nmodel-free',
+                   'new\nrule',
+                   'human'],
+            palette=['palegoldenrod', 'mistyrose', 'skyblue', 'lightgrey'], edgecolor=".5"
+            )
+plt.ylabel('perseverative errors')
+plt.ylim(ax['a'].get_ylim())
+plt.xlabel('')
 
 
-plt.title('performance in card sorting task for models and humans')
-
+plt.suptitle('performance in card sorting task for models and humans')
+for label, ax in ax.items():
+    # label physical distance to the left and up:
+    trans = mtransforms.ScaledTranslation(-20/72, 7/72, fig.dpi_scale_trans)
+    ax.text(0.0, 1.0, label, transform=ax.transAxes + trans,
+            fontsize='large', weight='bold', va='bottom', fontfamily='serif')
 
 # for label, ax in ax.items():
 #     # label physical distance to the left and up:
@@ -77,16 +81,24 @@ plt.title('performance in card sorting task for models and humans')
 
 
 # calculate statistical significance
-print(df.groupby('agent')['error', 'perseverative_error'].aggregate(['mean', 'std']))
+print(df.groupby('agent')['error', 'perseverative_error'].aggregate(['mean', 'std']).round(2))
+errors_ss = pd.DataFrame()
+perrors_ss = pd.DataFrame()
 for comparison in combinations(df['agent'].unique(), 2):
     print('____', comparison, '____')
     errors_0 = df[df['agent'] == comparison[0]]['error']
     errors_1 = df[df['agent'] == comparison[1]]['error']
-    print('compare total errors', ttest_ind(errors_0, errors_1, equal_var=False))
+    # print('compare total errors', ttest_ind(errors_0, errors_1, equal_var=False))
+    errors_test = ttest_ind(errors_0, errors_1, equal_var=False)
+    errors_ss.loc[comparison[0], comparison[1]] = f'{errors_test.statistic:.2f}, p={errors_test.pvalue:.2E}, df={errors_test.df:.0f}'
     errors_0 = df[df['agent'] == comparison[0]]['perseverative_error']
     errors_1 = df[df['agent'] == comparison[1]]['perseverative_error']
-    print('compare perseverative errors', ttest_ind(errors_0, errors_1, equal_var=False))
+    # print('compare perseverative errors', ttest_ind(errors_0, errors_1, equal_var=False))
+    perrors_test = ttest_ind(errors_0, errors_1, equal_var=False)
+    perrors_ss.loc[comparison[0], comparison[1]] = f'{perrors_test.statistic:.2f}, p={perrors_test.pvalue:.2E}, df={perrors_test.df:.0f}'
 
+print(errors_ss)
+print(perrors_ss)
 
 plt.tight_layout()
 plt.savefig('../data/classic_cardsorting_results.png', dpi=300)

@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     best_perfect_info = optimize_params(environment=env, agent_class=PerfectInfoAgent,
                                         params={'n': [len(p)], 'c': [0.25, 0.5, 1, 2, 4], 'rotation_interval': [rotation_interval]},
-                                        param_search_steps=10000
+                                        param_search_steps=10_000
                                         )
     with open('../data/best_perfect_info_bandit.pkl', 'wb') as f:
         pickle.dump(best_perfect_info, f)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         pickle.dump(best_q_learner, f)
 
     best_gradient_agent = optimize_params(environment=env, agent_class=GradientLearner,
-                                          params={'n': [len(p)], 'alpha': [1, 0.5], 'baseline': [True, False]},
+                                          params={'n': [len(p)], 'alpha': [1, 0.5], 'baseline': [False]},
                                           param_search_steps=10_000
                                           )
     with open('../data/best_gradient_agent.pkl', 'wb') as f:

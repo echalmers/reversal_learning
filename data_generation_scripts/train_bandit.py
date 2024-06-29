@@ -27,13 +27,16 @@ state, _ = env.reset()
 #     modulated_agent = pickle.load(f)
 with open('../data/best_perfect_info_bandit.pkl', 'rb') as f:
     perfect_info = pickle.load(f)
+    print(perfect_info.__dict__)
 with open('../data/best_modulated_tabular_bandit.pkl', 'rb') as f:
     modulated_tabular = pickle.load(f)
+    print(modulated_tabular.__dict__)
 with open('../data/best_q_learner_bandit.pkl', 'rb') as f:
     q_learner = pickle.load(f)
+    print(q_learner.__dict__)
 with open('../data/best_gradient_agent.pkl', 'rb') as f:
     gradient_agent = pickle.load(f)
-
+    print(gradient_agent.agent.__dict__)
 
 
 agents = [
@@ -47,7 +50,7 @@ agents = [
 
 results = []
 
-for rep in range(10):
+for rep in range(20):
     for agent in agents:
         # np.random.seed(42)
         # random.seed(42)

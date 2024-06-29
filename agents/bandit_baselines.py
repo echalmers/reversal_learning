@@ -46,5 +46,5 @@ class PerfectInfoAgent(BGalbraithLearner):
 class GradientLearner(BGalbraithLearner):
 
     def __init__(self, n, alpha, baseline):
-        super().__init__(GradientAgent(MultiArmedBandit(k=n), EpsilonGreedyPolicy(0.1), alpha=alpha, baseline=baseline))
+        super().__init__(GradientAgent(MultiArmedBandit(k=n), SoftmaxPolicy(), alpha=alpha, baseline=baseline))
 
