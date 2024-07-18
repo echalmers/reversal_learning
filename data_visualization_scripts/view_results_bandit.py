@@ -22,8 +22,8 @@ interval = diff[diff != 0].index[1]
 
 # calculate LSWS
 results['switch'] = results['action'].diff() != 0
-results['loose_switch'] = ((results['reward'] < 0) & (results['switch'])) * 100
-results['win_stay'] = ((results['reward'] > 0) & (~results['switch'])) * 100
+results['loose_switch'] = ((results['reward'].shift(1) < 0) & (results['switch'])) * 100
+results['win_stay'] = ((results['reward'].shift(1) > 0) & (~results['switch'])) * 100
 wsls = pd.DataFrame()
 wsls['loose_switch'] = results[results['reward'] < 0].groupby(['agent', 'rep'])['loose_switch'].mean()
 wsls['win_stay'] = results[results['reward'] > 0].groupby(['agent', 'rep'])['win_stay'].mean()
